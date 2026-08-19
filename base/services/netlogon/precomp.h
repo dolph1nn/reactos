@@ -16,9 +16,18 @@
 #include <stdio.h>
 #include <windef.h>
 #include <winbase.h>
+#include <winnls.h>
 #include <winreg.h>
 #include <winsvc.h>
 #include <lmerr.h>
+#include <guiddef.h>
+#include <ntsecapi.h>
+#include <winsock2.h>
+
+/* Ahead of the generated header, which declares the domain controller
+ * information structure itself only when this one has not already done so.
+ * It in turn needs the socket and security types included above. */
+#include <dsgetdc.h>
 
 #include <netlogon_s.h>
 
@@ -30,5 +39,15 @@ DWORD
 WINAPI
 RpcThreadRoutine(
     LPVOID lpParameter);
+
+/* dclocator.c */
+
+DWORD
+NlLocateDomainController(
+    _In_ PCWSTR pszDomainName,
+    _In_opt_ PCWSTR pszAccountName,
+    _In_opt_ PCWSTR pszSiteName,
+    _In_ ULONG Flags,
+    _Out_ PDOMAIN_CONTROLLER_INFOW *ppDomainControllerInfo);
 
 #endif /* _NETLOGON_PCH_ */

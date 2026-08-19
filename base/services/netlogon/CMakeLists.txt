@@ -6,6 +6,8 @@ spec2def(netlogon.dll netlogon.spec ADD_IMPORTLIB)
 add_definitions(-DWIN32_LEAN_AND_MEAN=)
 
 list(APPEND SOURCE
+    cldap.c
+    dclocator.c
     netlogon.c
     rpcserver.c
     precomp.h)
@@ -18,7 +20,7 @@ add_library(netlogon MODULE
     ${CMAKE_CURRENT_BINARY_DIR}/netlogon.def)
 
 set_module_type(netlogon win32dll UNICODE)
-target_link_libraries(netlogon wine ${PSEH_LIB})
-add_importlibs(netlogon advapi32 rpcrt4 msvcrt kernel32 ntdll)
+target_link_libraries(netlogon wine dnswire ${PSEH_LIB})
+add_importlibs(netlogon advapi32 rpcrt4 dnsapi ws2_32 msvcrt kernel32 ntdll)
 add_pch(netlogon precomp.h SOURCE)
 add_cd_file(TARGET netlogon DESTINATION reactos/system32 FOR all)

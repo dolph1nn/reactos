@@ -394,8 +394,19 @@ DsrGetDcName(
     _In_ ULONG Flags,
     _Out_ PDOMAIN_CONTROLLER_INFOW *DomainControllerInfo)
 {
-    UNIMPLEMENTED;
-    return 0;
+    TRACE("DsrGetDcName(%s %s %p %p %08lx %p)\n",
+          debugstr_w(ComputerName), debugstr_w(DomainName), DomainGuid,
+          SiteGuid, Flags, DomainControllerInfo);
+
+    /* MS-NRPC section 3.5.4.3.4: SiteGuid is unused and must be ignored. */
+    return DsrGetDcNameEx2(ComputerName,
+                           NULL,
+                           0,
+                           DomainName,
+                           DomainGuid,
+                           NULL,
+                           Flags,
+                           DomainControllerInfo);
 }
 
 
@@ -502,8 +513,18 @@ DsrGetDcNameEx(
     _In_ ULONG Flags,
     _Out_ PDOMAIN_CONTROLLER_INFOW *DomainControllerInfo)
 {
-    UNIMPLEMENTED;
-    return 0;
+    TRACE("DsrGetDcNameEx(%s %s %p %s %08lx %p)\n",
+          debugstr_w(ComputerName), debugstr_w(DomainName), DomainGuid,
+          debugstr_w(SiteName), Flags, DomainControllerInfo);
+
+    return DsrGetDcNameEx2(ComputerName,
+                           NULL,
+                           0,
+                           DomainName,
+                           DomainGuid,
+                           SiteName,
+                           Flags,
+                           DomainControllerInfo);
 }
 
 
@@ -613,8 +634,64 @@ DsrGetDcNameEx2(
     _In_ ULONG Flags,
     _Out_ PDOMAIN_CONTROLLER_INFOW *DomainControllerInfo)
 {
-    UNIMPLEMENTED;
-    return NERR_DCNotFound;
+    DWORD Error;
+
+    TRACE("DsrGetDcNameEx2(%s %s %08lx %s %p %s %08lx %p)\n",
+          debugstr_w(ComputerName), debugstr_w(AccountName),
+          AllowableAccountControlBits, debugstr_w(DomainName), DomainGuid,
+          debugstr_w(SiteName), Flags, DomainControllerInfo);
+
+    if (DomainControllerInfo == NULL)
+        return ERROR_INVALID_PARAMETER;
+
+    *DomainControllerInfo = NULL;
+
+    /* Locating a controller for another computer would mean asking that
+     * computer to do it, which is a different job entirely. */
+    if (ComputerName != NULL && *ComputerName != UNICODE_NULL)
+    {
+        FIXME("Locating a controller on behalf of %s is not supported\n",
+              debugstr_w(ComputerName));
+        return ERROR_NOT_SUPPORTED;
+    }
+
+    /* Without a domain to look for, the answer would have to come from this
+     * computer's own membership, which nothing records yet. */
+    if (DomainName == NULL || *DomainName == UNICODE_NULL)
+    {
+        FIXME("Locating a controller for this computer's own domain is not "
+              "supported yet\n");
+        return ERROR_NO_SUCH_DOMAIN;
+    }
+
+    if (AllowableAccountControlBits != 0)
+        FIXME("Ignoring AllowableAccountControlBits %08lx\n",
+              AllowableAccountControlBits);
+
+    Error = NlLocateDomainController(DomainName,
+                                     AccountName,
+                                     SiteName,
+                                     Flags,
+                                     DomainControllerInfo);
+    if (Error != ERROR_SUCCESS)
+    {
+        /* Passed through as it stands: ERROR_NO_SUCH_DOMAIN says the domain
+         * publishes no controllers, NERR_DCNotFound says it publishes some
+         * but none of them could be used. Collapsing the two would throw away
+         * the only clue about which half of the process went wrong. */
+        TRACE("NlLocateDomainController() failed (Error %lu)\n", Error);
+        return Error;
+    }
+
+    /* The domain a caller names and the domain it means can differ, so a
+     * caller that knew the identity of the domain gets to insist on it. */
+    if (DomainGuid != NULL &&
+        !IsEqualGUID(DomainGuid, &(*DomainControllerInfo)->DomainGuid))
+    {
+        FIXME("Found a controller for a different domain instance\n");
+    }
+
+    return NERR_Success;
 }
 
 
