@@ -19,6 +19,7 @@ list(APPEND SOURCE
     record.c
     rpc.c
     stubs.c
+    wire.c
     precomp.h
     ${CMAKE_CURRENT_BINARY_DIR}/dnsrslvr_c.c)
 
@@ -29,7 +30,7 @@ add_library(dnsapi MODULE
     ${CMAKE_CURRENT_BINARY_DIR}/dnsapi.def)
 
 set_module_type(dnsapi win32dll)
-target_link_libraries(dnsapi adns ${PSEH_LIB})
+target_link_libraries(dnsapi adns dnswire ${PSEH_LIB})
 add_importlibs(dnsapi advapi32 rpcrt4 user32 ws2_32 iphlpapi msvcrt kernel32 ntdll)
 add_pch(dnsapi precomp.h SOURCE)
 add_cd_file(TARGET dnsapi DESTINATION reactos/system32 FOR all)

@@ -141,4 +141,11 @@ static inline LPSTR dns_strdup_ua( const char *src )
 DNS_STATUS DnsIntTranslateAdnsToDNS_STATUS(int Status);
 void DnsIntFreeRecordList(PDNS_RECORD ToFree);
 
+DNS_STATUS
+DnsIntQueryWire(
+    _In_ PCWSTR pszName,
+    _In_ WORD wType,
+    _In_ DWORD dwOptions,
+    _Outptr_ PDNS_RECORDW *ppRecords);
+
 #endif /* _DNSAPI_H */

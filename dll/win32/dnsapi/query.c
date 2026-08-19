@@ -500,7 +500,12 @@ DnsQuery_W(LPCWSTR Name,
      * According to RFC a-z,A-Z,0-9,-,_, but can't start or end with - or _
      */
     NameLen = wcslen(Name);
-    if (Name[0] == L'-' || Name[0] == L'_' || Name[NameLen - 1] == L'-' ||
+    if (NameLen == 0)
+        return ERROR_INVALID_NAME;
+
+    /* A leading underscore is not a typo. RFC 2782 spells service names that
+     * way, and _ldap._tcp.<domain> is how a domain controller is located. */
+    if (Name[0] == L'-' || Name[NameLen - 1] == L'-' ||
         Name[NameLen - 1] == L'_' || wcsstr(Name, L"..") != NULL)
     {
         return ERROR_INVALID_NAME;
@@ -880,6 +885,18 @@ Query_Main(LPCWSTR Name,
         RtlFreeHeap(RtlGetProcessHeap(), 0, CurrentName);
         return ERROR_FILE_NOT_FOUND;
 
+    case DNS_TYPE_AAAA:
+    case DNS_TYPE_CNAME:
+    case DNS_TYPE_NS:
+    case DNS_TYPE_PTR:
+    case DNS_TYPE_SRV:
+        /* The bundled adns cannot ask for any of these -- it has no notion of
+         * SRV at all -- so they are resolved directly instead. */
+        if ((Options & DNS_QUERY_NO_WIRE_QUERY) != 0)
+            return ERROR_FILE_NOT_FOUND;
+
+        return DnsIntQueryWire(Name, Type, Options, (PDNS_RECORDW *)QueryResultSet);
+
     default:
         return ERROR_OUTOFMEMORY; /* XXX arty: find a better error code. */
     }
@@ -912,6 +929,10 @@ DnsIntFreeRecordList(PDNS_RECORD ToDelete)
             case DNS_TYPE_MINFO:
             case DNS_TYPE_MX:
                 RtlFreeHeap(RtlGetProcessHeap(), 0, ToDelete->Data.MX.pNameExchange);
+                break;
+
+            case DNS_TYPE_SRV:
+                RtlFreeHeap(RtlGetProcessHeap(), 0, ToDelete->Data.SRV.pNameTarget);
                 break;
 
             case DNS_TYPE_HINFO:
