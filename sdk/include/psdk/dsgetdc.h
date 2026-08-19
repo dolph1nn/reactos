@@ -12,6 +12,57 @@ extern "C" {
 #define DS_DOMAIN_NATIVE_MODE     0x10
 #define DS_DOMAIN_DIRECT_INBOUND  0x20
 
+/* Flags accepted by DsGetDcName */
+#define DS_FORCE_REDISCOVERY             0x00000001
+#define DS_DIRECTORY_SERVICE_REQUIRED    0x00000010
+#define DS_DIRECTORY_SERVICE_PREFERRED   0x00000020
+#define DS_GC_SERVER_REQUIRED            0x00000040
+#define DS_PDC_REQUIRED                  0x00000080
+#define DS_BACKGROUND_ONLY               0x00000100
+#define DS_IP_REQUIRED                   0x00000200
+#define DS_KDC_REQUIRED                  0x00000400
+#define DS_TIMESERV_REQUIRED             0x00000800
+#define DS_WRITABLE_REQUIRED             0x00001000
+#define DS_GOOD_TIMESERV_PREFERRED       0x00002000
+#define DS_AVOID_SELF                    0x00004000
+#define DS_ONLY_LDAP_NEEDED              0x00008000
+#define DS_IS_FLAT_NAME                  0x00010000
+#define DS_IS_DNS_NAME                   0x00020000
+#define DS_TRY_NEXTCLOSEST_SITE          0x00040000
+#define DS_DIRECTORY_SERVICE_6_REQUIRED  0x00080000
+#define DS_WEB_SERVICE_REQUIRED          0x00100000
+#define DS_DIRECTORY_SERVICE_8_REQUIRED  0x00200000
+#define DS_DIRECTORY_SERVICE_9_REQUIRED  0x00400000
+#define DS_DIRECTORY_SERVICE_10_REQUIRED 0x00800000
+#define DS_RETURN_DNS_NAME               0x40000000
+#define DS_RETURN_FLAT_NAME              0x80000000
+
+/* Flags reported in DOMAIN_CONTROLLER_INFO.Flags */
+#define DS_PDC_FLAG                    0x00000001
+#define DS_GC_FLAG                     0x00000004
+#define DS_LDAP_FLAG                   0x00000008
+#define DS_DS_FLAG                     0x00000010
+#define DS_KDC_FLAG                    0x00000020
+#define DS_TIMESERV_FLAG               0x00000040
+#define DS_CLOSEST_FLAG                0x00000080
+#define DS_WRITABLE_FLAG               0x00000100
+#define DS_GOOD_TIMESERV_FLAG          0x00000200
+#define DS_NDNC_FLAG                   0x00000400
+#define DS_SELECT_SECRET_DOMAIN_6_FLAG 0x00000800
+#define DS_FULL_SECRET_DOMAIN_6_FLAG   0x00001000
+#define DS_WS_FLAG                     0x00002000
+#define DS_DS_8_FLAG                   0x00004000
+#define DS_DS_9_FLAG                   0x00008000
+#define DS_DS_10_FLAG                  0x00010000
+#define DS_PING_FLAGS                  0x000FFFFF
+#define DS_DNS_CONTROLLER_FLAG         0x20000000
+#define DS_DNS_DOMAIN_FLAG             0x40000000
+#define DS_DNS_FOREST_FLAG             0x80000000
+
+/* Values of DOMAIN_CONTROLLER_INFO.DomainControllerAddressType */
+#define DS_INET_ADDRESS    1
+#define DS_NETBIOS_ADDRESS 2
+
 typedef struct _DOMAIN_CONTROLLER_INFOA
 {
 	LPSTR DomainControllerName;
