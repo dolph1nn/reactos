@@ -146,6 +146,37 @@ DnsIntFlushCacheEntry(
 }
 
 
+/**
+ * @brief
+ * Determines whether a cached record set can answer a query for a given type.
+ *
+ * @return
+ * TRUE if the set holds at least one record of that type, or if any type was
+ * asked for. A set may legitimately hold more than one type, since a CNAME is
+ * returned alongside the records it leads to.
+ */
+static
+BOOL
+DnsIntCacheSetHasType(
+    _In_ PDNS_RECORDW Record,
+    _In_ WORD wType)
+{
+    PDNS_RECORDW CurrentRecord;
+
+    if (wType == DNS_TYPE_ANY)
+        return TRUE;
+
+    for (CurrentRecord = Record;
+         CurrentRecord != NULL;
+         CurrentRecord = CurrentRecord->pNext)
+    {
+        if (CurrentRecord->wType == wType)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
 DNS_STATUS
 DnsIntCacheGetEntryByName(
     LPCWSTR Name,
@@ -173,8 +204,11 @@ DnsIntCacheGetEntryByName(
         /* Get the Current Entry */
         CacheEntry = CONTAINING_RECORD(NextEntry, RESOLVER_CACHE_ENTRY, CacheLink);
 
-        /* Check if this is the Catalog Entry ID we want */
-        if (_wcsicmp(CacheEntry->Record->pName, Name) == 0)
+        /* Check if this is the Catalog Entry ID we want. The type has to
+         * match too: a host with both an address and a service record would
+         * otherwise be answered from whichever was cached first. */
+        if (_wcsicmp(CacheEntry->Record->pName, Name) == 0 &&
+            DnsIntCacheSetHasType(CacheEntry->Record, wType))
         {
             /* Copy the entry and return it */
             *Record = DnsRecordSetCopyEx(CacheEntry->Record, DnsCharSetUnicode, DnsCharSetUnicode);
