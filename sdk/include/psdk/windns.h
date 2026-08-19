@@ -277,9 +277,20 @@ typedef struct {
   LPSTR pNameErrorsMailbox;
 } DNS_MINFO_DATAA, *PDNS_MINFO_DATAA;
 
+/*
+ * The DNS resolver service marshals DNS_RECORDW across RPC, and the strings
+ * reached through its union have to be declared as such or exactly one
+ * character of each is transferred. Expands to nothing for a C compiler.
+ */
+#if defined(__midl) || defined(__WIDL__)
+#define DNS_MIDL_STRING [unique, string]
+#else
+#define DNS_MIDL_STRING
+#endif
+
 typedef struct {
-  LPWSTR pNameMailbox;
-  LPWSTR pNameErrorsMailbox;
+  DNS_MIDL_STRING LPWSTR pNameMailbox;
+  DNS_MIDL_STRING LPWSTR pNameErrorsMailbox;
 } DNS_MINFO_DATAW, *PDNS_MINFO_DATAW;
 
 typedef struct {
@@ -289,7 +300,7 @@ typedef struct {
 } DNS_MX_DATAA, *PDNS_MX_DATAA;
 
 typedef struct {
-  LPWSTR pNameExchange;
+  DNS_MIDL_STRING LPWSTR pNameExchange;
   WORD wPreference;
   WORD Pad;
 } DNS_MX_DATAW, *PDNS_MX_DATAW;
@@ -316,7 +327,7 @@ typedef struct {
 } DNS_PTR_DATAA, *PDNS_PTR_DATAA;
 
 typedef struct {
-  LPWSTR pNameHost;
+  DNS_MIDL_STRING LPWSTR pNameHost;
 } DNS_PTR_DATAW, *PDNS_PTR_DATAW;
 
 typedef struct {
@@ -356,8 +367,8 @@ typedef struct {
 } DNS_SOA_DATAA, *PDNS_SOA_DATAA;
 
 typedef struct {
-  LPWSTR pNamePrimaryServer;
-  LPWSTR pNameAdministrator;
+  DNS_MIDL_STRING LPWSTR pNamePrimaryServer;
+  DNS_MIDL_STRING LPWSTR pNameAdministrator;
   DWORD dwSerialNo;
   DWORD dwRefresh;
   DWORD dwRetry;
@@ -374,7 +385,7 @@ typedef struct {
 } DNS_SRV_DATAA, *PDNS_SRV_DATAA;
 
 typedef struct {
-  LPWSTR pNameTarget;
+  DNS_MIDL_STRING LPWSTR pNameTarget;
   WORD wPriority;
   WORD wWeight;
   WORD wPort;
