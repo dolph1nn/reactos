@@ -28,6 +28,7 @@ endif()
 add_subdirectory(delayimp)
 add_subdirectory(dmilib)
 #add_subdirectory(dnslib) Nothing links to this lib.
+add_subdirectory(dnswire)
 add_subdirectory(drivers)
 add_subdirectory(dxguid)
 add_subdirectory(epsapi)
